@@ -105,6 +105,7 @@ function initMaterias() {
 // ------------------------------------------------------------
 let tablaMaterias = null;
 let carrerasCacheMat = [];
+let datosMateriasCache = {};   // id_materia → objeto completo
 
 async function cargarCarrerasMaterias() {
     const result = await apiFetch('/carreras/index.php');
@@ -125,6 +126,9 @@ async function cargarMaterias(carrera = '') {
     const result = await apiFetch(url);
     if (!result?.ok) return;
 
+    datosMateriasCache = {};
+    result.data.data.forEach(m => { datosMateriasCache[m.id_materia] = m; });
+
     const filas = result.data.data.map(m => `
         <tr>
             <td><strong>${m.id_materia}</strong></td>
@@ -138,11 +142,11 @@ async function cargarMaterias(carrera = '') {
             </td>
             <td>
                 <button class="btn btn-secondary btn-sm"
-                    onclick="abrirModalEditarMateria('${m.id_materia}','${m.nombre.replace(/'/g,"\\'")}','${m.fecha_inicio||''}','${m.fecha_fin||''}',${m.activo},'${m.carreras||''}')">
+                    onclick="abrirModalEditarMateria('${m.id_materia}')">
                     <i class="fa-solid fa-pen"></i>
                 </button>
                 <button class="btn btn-danger btn-sm" style="margin-left:4px"
-                    onclick="toggleMateria('${m.id_materia}','${m.nombre.replace(/'/g,"\\'")}',${m.activo})">
+                    onclick="toggleMateria('${m.id_materia}',${m.activo})">
                     <i class="fa-solid fa-${m.activo == 1 ? 'ban' : 'circle-check'}"></i>
                 </button>
             </td>
@@ -206,18 +210,21 @@ function abrirModalCrearMateria() {
     abrirModal('modal-materia');
 }
 
-function abrirModalEditarMateria(id, nombre, inicio, fin, activo, carrerasStr) {
-    const seleccionadas = carrerasStr ? carrerasStr.split(', ').map(s => s.trim()) : [];
+function abrirModalEditarMateria(id) {
+    const m = datosMateriasCache[id];
+    if (!m) return;
+
+    const seleccionadas = m.carreras ? m.carreras.split(', ').map(s => s.trim()) : [];
 
     document.getElementById('modal-materia-titulo').textContent      = 'Editar Materia';
     document.getElementById('materia-modo').value                    = 'editar';
-    document.getElementById('materia-id-original').value            = id;
-    document.getElementById('materia-id').value                      = id;
+    document.getElementById('materia-id-original').value            = m.id_materia;
+    document.getElementById('materia-id').value                      = m.id_materia;
     document.getElementById('materia-id').disabled                   = true;
-    document.getElementById('materia-nombre').value                  = nombre;
-    document.getElementById('materia-inicio').value                  = inicio;
-    document.getElementById('materia-fin').value                     = fin;
-    document.getElementById('materia-activo').value                  = activo;
+    document.getElementById('materia-nombre').value                  = m.nombre;
+    document.getElementById('materia-inicio').value                  = m.fecha_inicio || '';
+    document.getElementById('materia-fin').value                     = m.fecha_fin    || '';
+    document.getElementById('materia-activo').value                  = m.activo;
     document.getElementById('grupo-activo-materia').style.display    = 'flex';
     document.getElementById('grupo-activo-materia').style.flexDirection = 'column';
     document.getElementById('msg-materia').className                 = 'form-msg';
@@ -267,14 +274,19 @@ async function guardarMateria() {
 }
 
 // ------------------------------------------------------------
-async function toggleMateria(id, nombre, activo) {
-    const accion = activo == 1 ? 'desactivar' : 'activar';
-    if (!confirm(`¿${accion.charAt(0).toUpperCase() + accion.slice(1)} la materia "${nombre}"?`)) return;
+async function toggleMateria(id, activo) {
+    const m = datosMateriasCache[id];
+    if (!m) return;
+
+    const msg = activo == 1
+        ? `¿Desactivar la materia "${m.nombre}"?\n\nPodrás reactivarla desde Editar.`
+        : `¿Activar la materia "${m.nombre}"?`;
+    if (!confirm(msg)) return;
 
     const nuevoEstado = activo == 1 ? 0 : 1;
     const result = await apiFetch(`/materias/index.php?id=${id}`, {
         method: nuevoEstado === 0 ? 'DELETE' : 'PUT',
-        body: JSON.stringify({ nombre, activo: nuevoEstado }),
+        body: JSON.stringify({ nombre: m.nombre, activo: nuevoEstado }),
     });
 
     if (!result?.ok) { alert(result?.data?.message || 'Error.'); return; }

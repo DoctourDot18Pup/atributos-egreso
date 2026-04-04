@@ -131,6 +131,7 @@ function initCriterios() {
 let tablaCriterios = null;
 let carrerasCacheCr = [];
 let aeCacheCr = [];
+let datosCriterioCache = {};   // id_criterio → objeto completo
 
 async function cargarCarrerasCriterios() {
     const result = await apiFetch('/carreras/index.php');
@@ -200,6 +201,9 @@ async function cargarCriterios(carrera = '', ae = '') {
     const result = await apiFetch(url);
     if (!result?.ok) return;
 
+    datosCriterioCache = {};
+    result.data.data.forEach(cr => { datosCriterioCache[cr.id_criterio] = cr; });
+
     const filas = result.data.data.map(cr => `
         <tr>
             <td><strong>${cr.id_carrera}</strong></td>
@@ -213,7 +217,7 @@ async function cargarCriterios(carrera = '', ae = '') {
             </td>
             <td>
                 <button class="btn btn-secondary btn-sm"
-                    onclick="abrirModalEditarCriterio(${cr.id_criterio},${cr.id_ae},'${cr.id_carrera}','${cr.codigo_ae}','${cr.codigo_criterio}',${JSON.stringify(cr.descripcion)},${JSON.stringify(cr.desc_n1)},${JSON.stringify(cr.desc_n2)},${JSON.stringify(cr.desc_n3)},${JSON.stringify(cr.desc_n4)},${cr.activo})">
+                    onclick="abrirModalEditarCriterio(${cr.id_criterio})">
                     <i class="fa-solid fa-pen"></i>
                 </button>
                 <button class="btn btn-danger btn-sm" style="margin-left:4px"
@@ -258,27 +262,29 @@ function abrirModalCrearCriterio() {
     abrirModal('modal-criterio');
 }
 
-async function abrirModalEditarCriterio(id, idAE, carrera, codigoAE, codigo, desc, n1, n2, n3, n4, activo) {
+async function abrirModalEditarCriterio(id) {
+    const cr = datosCriterioCache[id];
+    if (!cr) return;
+
     document.getElementById('modal-criterio-titulo').textContent         = 'Editar Criterio';
     document.getElementById('criterio-modo').value                       = 'editar';
-    document.getElementById('criterio-id').value                         = id;
-    document.getElementById('criterio-carrera').value                    = carrera;
+    document.getElementById('criterio-id').value                         = cr.id_criterio;
+    document.getElementById('criterio-carrera').value                    = cr.id_carrera;
     document.getElementById('criterio-carrera').disabled                 = true;
-    document.getElementById('criterio-codigo').value                     = codigo;
+    document.getElementById('criterio-codigo').value                     = cr.codigo_criterio;
     document.getElementById('criterio-codigo').disabled                  = true;
-    document.getElementById('criterio-descripcion').value                = desc;
-    document.getElementById('criterio-n1').value                         = n1;
-    document.getElementById('criterio-n2').value                         = n2;
-    document.getElementById('criterio-n3').value                         = n3;
-    document.getElementById('criterio-n4').value                         = n4;
-    document.getElementById('criterio-activo').value                     = activo;
+    document.getElementById('criterio-descripcion').value                = cr.descripcion;
+    document.getElementById('criterio-n1').value                         = cr.desc_n1;
+    document.getElementById('criterio-n2').value                         = cr.desc_n2;
+    document.getElementById('criterio-n3').value                         = cr.desc_n3;
+    document.getElementById('criterio-n4').value                         = cr.desc_n4;
+    document.getElementById('criterio-activo').value                     = cr.activo;
     document.getElementById('grupo-activo-criterio').style.display       = 'flex';
     document.getElementById('grupo-activo-criterio').style.flexDirection = 'column';
     document.getElementById('msg-criterio').className                    = 'form-msg';
 
-    // Cargar AE de esa carrera y seleccionar el correcto
-    await cargarAEPorCarrera(carrera);
-    document.getElementById('criterio-ae').value    = idAE;
+    await cargarAEPorCarrera(cr.id_carrera);
+    document.getElementById('criterio-ae').value    = cr.id_ae;
     document.getElementById('criterio-ae').disabled = true;
 
     abrirModal('modal-criterio');

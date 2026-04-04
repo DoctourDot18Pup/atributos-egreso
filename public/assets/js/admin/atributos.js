@@ -97,6 +97,7 @@ function initAtributos() {
 // ------------------------------------------------------------
 let tablaAE = null;
 let carrerasCacheAE = [];
+let datosAECache = {};   // id_ae → objeto completo
 
 async function cargarCarrerasAE() {
     const result = await apiFetch('/carreras/index.php');
@@ -119,6 +120,9 @@ async function cargarAE(carrera = '') {
     const result = await apiFetch(url);
     if (!result?.ok) return;
 
+    datosAECache = {};
+    result.data.data.forEach(ae => { datosAECache[ae.id_ae] = ae; });
+
     const filas = result.data.data.map(ae => `
         <tr>
             <td><strong>${ae.id_carrera}</strong></td>
@@ -132,7 +136,7 @@ async function cargarAE(carrera = '') {
             </td>
             <td>
                 <button class="btn btn-secondary btn-sm"
-                    onclick="abrirModalEditarAE(${ae.id_ae},'${ae.id_carrera}','${ae.codigo_ae}',${JSON.stringify(ae.nombre).replace(/'/g,"\\'")},'${(ae.nombre_corto||'').replace(/'/g,"\\'")}',${ae.activo})">
+                    onclick="abrirModalEditarAE(${ae.id_ae})">
                     <i class="fa-solid fa-pen"></i>
                 </button>
                 <button class="btn btn-danger btn-sm" style="margin-left:4px"
@@ -173,17 +177,20 @@ function abrirModalCrearAE() {
     abrirModal('modal-ae');
 }
 
-function abrirModalEditarAE(id, carrera, codigo, nombre, nombreCorto, activo) {
+function abrirModalEditarAE(id) {
+    const ae = datosAECache[id];
+    if (!ae) return;
+
     document.getElementById('modal-ae-titulo').textContent        = 'Editar Atributo de Egreso';
     document.getElementById('ae-modo').value                      = 'editar';
-    document.getElementById('ae-id').value                        = id;
-    document.getElementById('ae-carrera').value                   = carrera;
+    document.getElementById('ae-id').value                        = ae.id_ae;
+    document.getElementById('ae-carrera').value                   = ae.id_carrera;
     document.getElementById('ae-carrera').disabled                = true;
-    document.getElementById('ae-codigo').value                    = codigo;
+    document.getElementById('ae-codigo').value                    = ae.codigo_ae;
     document.getElementById('ae-codigo').disabled                 = true;
-    document.getElementById('ae-nombre').value                    = nombre;
-    document.getElementById('ae-nombre-corto').value              = nombreCorto;
-    document.getElementById('ae-activo').value                    = activo;
+    document.getElementById('ae-nombre').value                    = ae.nombre;
+    document.getElementById('ae-nombre-corto').value              = ae.nombre_corto || '';
+    document.getElementById('ae-activo').value                    = ae.activo;
     document.getElementById('grupo-activo-ae').style.display      = 'flex';
     document.getElementById('grupo-activo-ae').style.flexDirection = 'column';
     document.getElementById('msg-ae').className                   = 'form-msg';

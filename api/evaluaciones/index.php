@@ -15,18 +15,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/session.php';
 
-$usuario = requireRol('admin', 'coordinador');
+$usuario = requireRol('admin', 'coordinador', 'alumno');
 
 $pdo = getDB();
 
-// Coordinador solo ve su carrera
-$carrera    = $usuario->rol === 'coordinador'
-    ? $usuario->id_carrera
-    : trim($_GET['carrera'] ?? '');
+// Coordinador: solo su carrera. Alumno: solo sus propias evaluaciones.
+if ($usuario->rol === 'coordinador') {
+    $carrera = $usuario->id_carrera;
+} else {
+    $carrera = trim($_GET['carrera'] ?? '');
+}
 
-$id_periodo  = (int)($_GET['periodo']    ?? 0);
-$id_materia  = trim($_GET['materia']     ?? '');
-$id_est      = (int)($_GET['estudiante'] ?? 0);
+$id_periodo = (int)($_GET['periodo']    ?? 0);
+$id_materia = trim($_GET['materia']     ?? '');
+
+// Alumno siempre ve solo sus evaluaciones
+if ($usuario->rol === 'alumno') {
+    $id_est = (int)$usuario->id_estudiante;
+} else {
+    $id_est = (int)($_GET['estudiante'] ?? 0);
+}
 
 $sql = "
     SELECT ev.id_evaluacion, ev.fecha_evaluacion,

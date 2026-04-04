@@ -3,162 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Atributos de Egreso</title>
+    <title>Alumno | Atributos de Egreso</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="../assets/css/normalize.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
     <style>
-        :root {
-            --verde-itc: #1a6b35;
-            --font: 'Montserrat', sans-serif;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: var(--font);
-            background: #f0f2f0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            padding: 24px;
-        }
-
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 24px rgba(26,107,53,0.10);
-        }
-
-        .badge {
-            display: inline-block;
-            background: var(--verde-itc);
-            color: #fff;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-bottom: 16px;
-        }
-
-        h1 {
-            font-size: 1.3rem;
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
-
-        p {
-            font-size: 0.88rem;
-            color: #718096;
-            margin-bottom: 24px;
-        }
-
-        .info {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: left;
-            font-size: 0.82rem;
-            color: #4a5568;
-            margin-bottom: 24px;
-            line-height: 1.8;
-        }
-
-        .info span {
-            font-weight: 600;
-            color: var(--verde-itc);
-        }
-
-        .btn-logout {
-            background: #e53e3e;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 11px 28px;
-            font-family: var(--font);
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-logout:hover {
-            background: #c53030;
-        }
-
-        .placeholder-note {
-            font-size: 0.78rem;
-            color: #a0aec0;
-            margin-top: 12px;
+        /* Likert option hover */
+        .likert-opt:hover {
+            border-color: #a0aec0 !important;
+            background: #f7fafc !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div id="badge" class="badge">cargando...</div>
-        <h1 id="bienvenida">Bienvenido</h1>
-        <p>Sesión iniciada correctamente</p>
-
-        <div class="info">
-            <div>Usuario: <span id="info-email">—</span></div>
-            <div>Rol: <span id="info-rol">—</span></div>
-            <div id="info-extra"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img src="../assets/img/logo_lince.png" alt="ITC">
+            <div class="sidebar-brand-text">
+                <span>Atributos de Egreso</span>
+                <span>Portal del Alumno</span>
+            </div>
         </div>
 
-        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
-        <p class="placeholder-note">Dashboard en construcción — Fase 4</p>
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Panel</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="#" data-view="inicio" class="nav-link">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Inicio / Resumen
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-view="evaluar" class="nav-link">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        Evaluar
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-view="historial" class="nav-link">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Historial
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="user-avatar">A</div>
+                <div class="sidebar-user-info">
+                    <span id="user-nombre">—</span>
+                    <span id="user-matricula">—</span>
+                </div>
+            </div>
+            <button class="btn-logout-sidebar" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Cerrar sesión
+            </button>
+        </div>
+    </aside>
+
+    <div class="main-area">
+        <header class="topbar">
+            <h1 class="topbar-title" id="topbar-title">Portal del Alumno</h1>
+            <span class="topbar-subtitle" id="topbar-subtitle"></span>
+        </header>
+        <main class="content-area" id="content-area">
+            <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>
+        </main>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="../assets/js/utils.js"></script>
-    <script>
-        // Proteger ruta — detectar rol desde URL
-        const path = window.location.pathname;
-        let rolRequerido = null;
-        if (path.includes('/admin/'))       rolRequerido = 'admin';
-        if (path.includes('/coordinador/')) rolRequerido = 'coordinador';
-        if (path.includes('/alumno/'))      rolRequerido = 'alumno';
-
-        const usuario = requireAuth(rolRequerido);
-
-        // Poblar UI con datos de la sesión
-        if (usuario) {
-            document.getElementById('badge').textContent       = usuario.rol.toUpperCase();
-            document.getElementById('info-email').textContent  = usuario.email;
-            document.getElementById('info-rol').textContent    = usuario.rol;
-
-            let extra = '';
-            if (usuario.nombre) {
-                document.getElementById('bienvenida').textContent =
-                    `Bienvenido, ${usuario.nombre} ${usuario.apellido_paterno || ''}`.trim();
-                extra += `Matrícula: <span>${usuario.matricula || '—'}</span><br>`;
-                extra += `Carrera: <span>${usuario.nombre_carrera || '—'}</span>`;
-            }
-            if (usuario.id_carrera && usuario.rol === 'coordinador') {
-                extra += `Carrera asignada: <span>${usuario.id_carrera}</span>`;
-            }
-            document.getElementById('info-extra').innerHTML = extra;
-        }
-
-        async function logout() {
-            try {
-                await apiFetch('/auth/logout.php', { method: 'POST' });
-            } catch (_) {
-                // Si falla el endpoint igual limpiamos local
-            } finally {
-                Auth.clear();
-                window.location.href = '/atributos-egreso/public/index.html';
-            }
-        }
-    </script>
+    <script src="../assets/js/alumno/dashboard-alumno.js"></script>
+    <script src="../assets/js/alumno/inicio.js"></script>
+    <script src="../assets/js/alumno/evaluar.js"></script>
+    <script src="../assets/js/alumno/historial.js"></script>
+    <script>cargarVistaAlumno('inicio');</script>
 </body>
 </html>

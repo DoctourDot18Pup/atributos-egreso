@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/session.php';
 
-requireRol('admin', 'coordinador');
+requireRol('admin', 'coordinador', 'alumno');
 
 $pdo    = getDB();
 $method = $_SERVER['REQUEST_METHOD'];

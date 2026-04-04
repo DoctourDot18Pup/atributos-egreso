@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/session.php';
 
-requireRol('admin');
+$usuario = requireRol('admin', 'coordinador', 'alumno');
 
 $pdo    = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -61,6 +61,7 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'POST':
+        if ($usuario->rol !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Acceso denegado.']); exit; }
         $body = json_decode(file_get_contents('php://input'), true);
 
         $id_ae          = (int)($body['id_ae']          ?? 0);
@@ -115,6 +116,7 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'PUT':
+        if ($usuario->rol !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Acceso denegado.']); exit; }
         $id   = (int)($_GET['id'] ?? 0);
         $body = json_decode(file_get_contents('php://input'), true);
 
@@ -166,6 +168,7 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'DELETE':
+        if ($usuario->rol !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Acceso denegado.']); exit; }
         $id = (int)($_GET['id'] ?? 0);
 
         if (!$id) {

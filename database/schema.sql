@@ -152,6 +152,7 @@ CREATE TABLE usuarios (
     id_estudiante   INT UNSIGNED DEFAULT NULL,   -- solo cuando rol = alumno
     id_carrera      VARCHAR(10)  DEFAULT NULL,   -- para coordinador: su carrera asignada
     activo          TINYINT(1)   NOT NULL DEFAULT 1,
+    primera_vez     TINYINT(1)   NOT NULL DEFAULT 0,   -- 1 = debe cambiar contraseña en el próximo ingreso
     ultimo_acceso   DATETIME    DEFAULT NULL,
     created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_usuario),

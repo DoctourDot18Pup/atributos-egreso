@@ -1,0 +1,15 @@
+# Dependencias y temporales
+/vendor/
+*.log
+*.tmp
+
+# Configuración local sensible
+api/config/local.php
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/settings.json
+.idea/

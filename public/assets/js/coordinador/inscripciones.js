@@ -211,11 +211,11 @@ async function cargarTablaInscripciones() {
         const numMat  = est.materias.length;
         const badge   = numMat > 0
             ? est.materias.map(m => `
-                <span title="${m.nombre}"
-                      style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.72rem;
-                             font-weight:600;background:#f0fff4;color:#276749;border:1px solid #9ae6b4;
-                             margin:2px 3px 2px 0;white-space:nowrap;cursor:default">
-                    ${m.id_materia}
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;
+                             border-radius:12px;font-size:0.72rem;background:#f0fff4;
+                             color:#276749;border:1px solid #9ae6b4;margin:2px 3px 2px 0">
+                    <span style="font-weight:700">${m.id_materia}</span>
+                    <span style="color:#4a7c59">${m.nombre}</span>
                 </span>`).join('')
             : `<span style="padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;
                             background:#fff5f5;color:#c53030;border:1px solid #feb2b2">Sin inscripciones</span>`;

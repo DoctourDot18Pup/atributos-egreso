@@ -1,0 +1,238 @@
+/* ============================================================
+   assets/css/auth.css
+   Estilos para login de los tres roles
+   ============================================================ */
+
+:root {
+    --verde-itc:    #1a6b35;
+    --verde-hover:  #145228;
+    --gris-fondo:   #f0f2f0;
+    --gris-borde:   #d1d9d1;
+    --gris-texto:   #4a5568;
+    --gris-suave:   #718096;
+    --blanco:       #ffffff;
+    --rojo-error:   #c53030;
+    --verde-exito:  #276749;
+    --sombra:       0 4px 24px rgba(26, 107, 53, 0.10);
+    --sombra-hover: 0 8px 32px rgba(26, 107, 53, 0.18);
+    --radio:        12px;
+    --font:         'Montserrat', sans-serif;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font);
+    background-color: var(--gris-fondo);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(26,107,53,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(26,107,53,0.04) 0%, transparent 50%);
+}
+
+/* ------------------------------------------------------------
+   Wrapper externo — contiene la línea verde y la card
+   ------------------------------------------------------------ */
+.auth-wrapper {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp 0.35s ease both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Línea verde superior — separada de la card para evitar overflow */
+.auth-topbar {
+    height: 4px;
+    background: var(--verde-itc);
+    border-radius: var(--radio) var(--radio) 0 0;
+}
+
+/* ------------------------------------------------------------
+   Card
+   ------------------------------------------------------------ */
+.auth-card {
+    background: var(--blanco);
+    border-radius: 0 0 var(--radio) var(--radio);
+    box-shadow: var(--sombra);
+    padding: 40px 40px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ------------------------------------------------------------
+   Logo
+   ------------------------------------------------------------ */
+.auth-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+/* ------------------------------------------------------------
+   Textos
+   ------------------------------------------------------------ */
+.auth-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--verde-itc);
+    margin: 0 0 4px;
+    text-align: center;
+}
+
+.auth-subtitle {
+    font-size: 0.85rem;
+    color: var(--gris-suave);
+    margin: 0 0 28px;
+    text-align: center;
+}
+
+/* ------------------------------------------------------------
+   Formulario
+   ------------------------------------------------------------ */
+#form-login {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--gris-texto);
+    letter-spacing: 0.02em;
+}
+
+.inp {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 0.9rem;
+    color: var(--gris-texto);
+    background: var(--blanco);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+.inp::placeholder {
+    color: #b0bec5;
+}
+
+.inp:focus {
+    border-color: var(--verde-itc);
+    box-shadow: 0 0 0 3px rgba(26, 107, 53, 0.10);
+}
+
+/* ------------------------------------------------------------
+   Botón principal
+   ------------------------------------------------------------ */
+.btn-login {
+    margin-top: 6px;
+    width: 100%;
+    padding: 13px;
+    background: var(--verde-itc);
+    color: var(--blanco);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: 0.02em;
+}
+
+.btn-login:hover:not(:disabled) {
+    background: var(--verde-hover);
+    box-shadow: var(--sombra-hover);
+    transform: translateY(-1px);
+}
+
+.btn-login:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-login:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------
+   Mensaje de error / éxito
+   ------------------------------------------------------------ */
+.form-msg {
+    min-height: 20px;
+    font-size: 0.82rem;
+    text-align: center;
+    margin-top: 8px;
+    border-radius: 6px;
+    padding: 0;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.form-msg--error {
+    color: var(--rojo-error);
+    background: #fff5f5;
+    padding: 8px 12px;
+}
+
+.form-msg--exito {
+    color: var(--verde-exito);
+    background: #f0fff4;
+    padding: 8px 12px;
+}
+
+/* ------------------------------------------------------------
+   Links inferiores
+   ------------------------------------------------------------ */
+.auth-links {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.auth-links a {
+    font-size: 0.82rem;
+    color: var(--gris-suave);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-links a:hover {
+    color: var(--verde-itc);
+}
+
+/* ------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------ */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 32px 24px 28px;
+    }
+}

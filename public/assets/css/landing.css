@@ -1,0 +1,211 @@
+/* ============================================================
+   assets/css/landing.css
+   Estilos para la página de inicio (index.html)
+   ============================================================ */
+
+:root {
+    --verde-itc:    #1a6b35;
+    --verde-claro:  #2d8a4e;
+    --verde-hover:  #145228;
+    --gris-fondo:   #f0f2f0;
+    --gris-texto:   #4a5568;
+    --gris-suave:   #718096;
+    --blanco:       #ffffff;
+    --sombra:       0 4px 24px rgba(26, 107, 53, 0.10);
+    --sombra-hover: 0 8px 32px rgba(26, 107, 53, 0.18);
+    --font:         'Montserrat', sans-serif;
+}
+
+body {
+    font-family: var(--font);
+    background-color: var(--gris-fondo);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ------------------------------------------------------------
+   Imagen decorativa de fondo — lince centrado con opacidad
+   ------------------------------------------------------------ */
+body::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background-image: url('../img/logo_lince.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.50;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Todo el contenido va por encima del fondo */
+.main-header,
+.main-content,
+.main-footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* ------------------------------------------------------------
+   Header
+   ------------------------------------------------------------ */
+.main-header {
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+}
+
+.header-logo img {
+    height: 56px;
+    width: auto;
+}
+
+.header-logo{
+    display: none;
+}
+
+/* ------------------------------------------------------------
+   Contenido principal
+   ------------------------------------------------------------ */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    gap: 48px;
+}
+
+/* ------------------------------------------------------------
+   Hero text
+   ------------------------------------------------------------ */
+.hero-text {
+    text-align: center;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 12px;
+    line-height: 1.2;
+}
+
+.hero-title span {
+    color: var(--verde-itc);
+}
+
+.hero-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.05rem);
+    color: var(--gris-suave);
+    margin: 0;
+}
+
+/* ------------------------------------------------------------
+   Grid de acceso
+   ------------------------------------------------------------ */
+.access-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.access-card {
+    background: var(--blanco);
+    border-radius: 12px;
+    padding: 36px 24px;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: var(--sombra);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    border: 2px solid transparent;
+}
+
+.access-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sombra-hover);
+    border-color: rgba(26, 107, 53, 0.15);
+}
+
+.card-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(26, 107, 53, 0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: var(--verde-itc);
+    transition: background 0.2s;
+}
+
+.access-card:hover .card-icon {
+    background: rgba(26, 107, 53, 0.14);
+}
+
+.card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.card-desc {
+    font-size: 0.83rem;
+    color: var(--gris-suave);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------ */
+.main-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8rem;
+    color: var(--gris-suave);
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------ */
+@media (max-width: 700px) {
+    .access-grid {
+        grid-template-columns: 1fr;
+        max-width: 360px;
+    }
+
+    .main-header {
+        padding: 16px 20px;
+    }
+
+    body::before {
+        width: 320px;
+        height: 320px;
+    }
+}
+
+@media (max-width: 960px) and (min-width: 701px) {
+    .access-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 600px;
+    }
+}

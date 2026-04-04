@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Atributos de Egreso | ITC Celaya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/normalize.css">
+    <link rel="stylesheet" href="assets/css/landing.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-logo">
+            <img src="assets/img/logo_lince.png" alt="Instituto Tecnológico de Celaya">
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <div class="hero-text">
+            <h1 class="hero-title">Atributos de <span>Egreso</span></h1>
+            <p class="hero-subtitle">Plataforma Institucional para la Evaluación y Mejora Continua</p>
+        </div>
+
+        <div class="access-grid">
+
+            <a href="alumno/login.html" class="access-card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2 class="card-title">Alumnos</h2>
+                <p class="card-desc">Accede para responder las encuestas de evaluación de tus asignaturas.</p>
+            </a>
+
+            <a href="coordinador/login.html" class="access-card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <h2 class="card-title">Coordinadores</h2>
+                <p class="card-desc">Gestión de atributos, criterios y seguimiento por carrera.</p>
+            </a>
+
+            <a href="admin/login.html" class="access-card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-gears"></i>
+                </div>
+                <h2 class="card-title">Administración</h2>
+                <p class="card-desc">Configuración del sistema, usuarios y periodos académicos.</p>
+            </a>
+
+        </div>
+
+    </main>
+
+    <footer class="main-footer">
+        <p>Tecnológico Nacional de México en Celaya &copy; 2026</p>
+    </footer>
+
+    <script src="assets/js/utils.js"></script>
+    <script>
+        // Si ya hay sesión activa, redirigir directo al dashboard
+        if (Auth.isLoggedIn()) {
+            redirigirPorRol(Auth.getRol());
+        }
+    </script>
+</body>
+</html>

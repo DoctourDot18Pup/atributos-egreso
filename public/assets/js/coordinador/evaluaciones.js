@@ -53,8 +53,7 @@ function initEvaluaciones() {
         </div>
     `;
 
-    cargarFiltrosEval();
-    cargarEvaluaciones();
+    cargarFiltrosEval(); // llama a cargarEvaluaciones internamente al terminar
 }
 
 // ------------------------------------------------------------
@@ -71,6 +70,9 @@ async function cargarFiltrosEval() {
         resPer.data.data.forEach(p => {
             selPer.innerHTML += `<option value="${p.id_periodo}">${p.nombre}</option>`;
         });
+        // Preseleccionar período activo
+        const activo = resPer.data.data.find(p => p.activo == 1);
+        if (activo) selPer.value = activo.id_periodo;
     }
 
     const selMat = document.getElementById('filtro-materia-ev');
@@ -79,6 +81,9 @@ async function cargarFiltrosEval() {
             selMat.innerHTML += `<option value="${m.id_materia}">${m.id_materia} — ${m.nombre}</option>`;
         });
     }
+
+    // Cargar tabla con los filtros ya establecidos
+    await filtrarEvaluaciones();
 }
 
 async function filtrarEvaluaciones() {

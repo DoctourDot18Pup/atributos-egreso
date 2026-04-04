@@ -32,6 +32,14 @@ function initEvaluaciones() {
                     <select id="filtro-materia-ev" class="form-control" style="width:220px" onchange="filtrarEvaluaciones()">
                         <option value="">Todas las materias</option>
                     </select>
+                    <button class="btn btn-secondary btn-sm" onclick="exportarEvaluacionesCSV()"
+                            title="Exportar tabla actual a CSV">
+                        <i class="fa-solid fa-file-csv"></i> Exportar CSV
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportarEvaluacionesPDF()"
+                            title="Exportar resumen en PDF">
+                        <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+                    </button>
                 </div>
             </div>
             <div class="card-body">
@@ -58,6 +66,8 @@ function initEvaluaciones() {
 
 // ------------------------------------------------------------
 let tablaEval = null;
+let _evalData  = [];        // caché de la última consulta (para exportar)
+let _evalMeta  = { periodo: '', materia: '' }; // filtros activos
 
 async function cargarFiltrosEval() {
     const [resPer, resMat] = await Promise.all([
@@ -100,6 +110,9 @@ async function cargarEvaluaciones(periodo = '', materia = '') {
     const result = await apiFetch(url);
     if (!result?.ok) return;
 
+    _evalData = result.data.data || [];
+    _evalMeta = { periodo, materia };
+
     const PROM_COLOR = p => p >= 3.5 ? '#276749' : p >= 2.5 ? '#2b6cb0' : p >= 1.5 ? '#d69e2e' : '#c53030';
 
     const filas = result.data.data.map(ev => {
@@ -134,6 +147,174 @@ async function cargarEvaluaciones(periodo = '', materia = '') {
         pageLength: 15,
         columnDefs: [{ orderable: false, targets: 6 }],
     }));
+}
+
+// ------------------------------------------------------------
+// Exportar CSV
+// ------------------------------------------------------------
+function exportarEvaluacionesCSV() {
+    if (!_evalData.length) {
+        alert('No hay evaluaciones para exportar.');
+        return;
+    }
+
+    const encabezado = ['Matrícula','Nombre','ID Materia','Materia','Período','Criterios evaluados','Promedio'];
+
+    const filas = _evalData.map(ev => {
+        const nombre = [ev.apellido_paterno, ev.apellido_materno, ev.est_nombre].filter(Boolean).join(' ');
+        const prom   = ev.promedio ? parseFloat(ev.promedio).toFixed(2) : '';
+        return [
+            ev.matricula,
+            nombre,
+            ev.id_materia,
+            ev.materia_nombre,
+            ev.periodo_nombre,
+            ev.total_criterios,
+            prom,
+        ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csv  = '\uFEFF' + [encabezado.join(','), ...filas].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+
+    const periodoLabel = document.getElementById('filtro-periodo-ev')?.selectedOptions[0]?.text || 'todos';
+    const slug = periodoLabel.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '');
+    a.href     = url;
+    a.download = `evaluaciones-${usuarioCoord.id_carrera}-${slug}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ------------------------------------------------------------
+// Exportar PDF
+// ------------------------------------------------------------
+async function exportarEvaluacionesPDF() {
+    if (!_evalData.length) {
+        alert('No hay evaluaciones para exportar.');
+        return;
+    }
+
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+
+    const periodoLabel = document.getElementById('filtro-periodo-ev')?.selectedOptions[0]?.text || 'Todos los períodos';
+    const materiaLabel = document.getElementById('filtro-materia-ev')?.selectedOptions[0]?.text || 'Todas las materias';
+    const fecha        = new Date().toLocaleDateString('es-MX', { day:'2-digit', month:'long', year:'numeric' });
+
+    // ── Encabezado
+    doc.setFillColor(39, 103, 73);
+    doc.rect(0, 0, doc.internal.pageSize.width, 22, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text('Reporte de Evaluaciones — Atributos de Egreso', 14, 9);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Carrera: ${usuarioCoord.id_carrera}   |   Período: ${periodoLabel}   |   Materia: ${materiaLabel}   |   Generado: ${fecha}`, 14, 16);
+
+    // ── Tabla principal
+    const LIKERT_NIVEL = p => p >= 3.5 ? 'Muy Bueno' : p >= 2.5 ? 'Bueno' : p >= 1.5 ? 'Suficiente' : 'No suficiente';
+    const NIVEL_COLOR  = p => p >= 3.5 ? [39,103,73] : p >= 2.5 ? [43,108,176] : p >= 1.5 ? [214,158,46] : [197,48,48];
+
+    const rows = _evalData.map(ev => {
+        const nombre = [ev.apellido_paterno, ev.apellido_materno, ev.est_nombre].filter(Boolean).join(' ');
+        const prom   = ev.promedio ? parseFloat(ev.promedio) : null;
+        return [
+            ev.matricula,
+            nombre,
+            `${ev.id_materia}\n${ev.materia_nombre}`,
+            ev.periodo_nombre,
+            ev.total_criterios,
+            prom !== null ? prom.toFixed(2) : '—',
+            prom !== null ? LIKERT_NIVEL(prom) : '—',
+        ];
+    });
+
+    doc.autoTable({
+        startY: 26,
+        head: [['Matrícula','Nombre','Materia','Período','Criterios','Promedio','Nivel']],
+        body: rows,
+        styles: { fontSize: 7.5, cellPadding: 3 },
+        headStyles: { fillColor: [39,103,73], textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+            0: { cellWidth: 22 },
+            1: { cellWidth: 48 },
+            2: { cellWidth: 54 },
+            3: { cellWidth: 28 },
+            4: { cellWidth: 18, halign: 'center' },
+            5: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
+            6: { cellWidth: 26, halign: 'center' },
+        },
+        alternateRowStyles: { fillColor: [247,250,252] },
+        didParseCell(data) {
+            if (data.section === 'body' && data.column.index === 5) {
+                const prom = parseFloat(data.cell.raw);
+                if (!isNaN(prom)) {
+                    const [r,g,b] = NIVEL_COLOR(prom);
+                    data.cell.styles.textColor = [r,g,b];
+                }
+            }
+            if (data.section === 'body' && data.column.index === 6) {
+                const prom = parseFloat(_evalData[data.row.index]?.promedio);
+                if (!isNaN(prom)) {
+                    const [r,g,b] = NIVEL_COLOR(prom);
+                    data.cell.styles.textColor = [r,g,b];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        },
+        didDrawPage(data) {
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFontSize(7);
+            doc.setTextColor(160,160,160);
+            doc.text(
+                `Página ${doc.internal.getCurrentPageInfo().pageNumber} de ${pageCount}`,
+                doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 5,
+                { align: 'center' }
+            );
+        },
+    });
+
+    // ── Resumen estadístico
+    const totalEv = _evalData.length;
+    const promedios = _evalData.map(ev => parseFloat(ev.promedio)).filter(p => !isNaN(p));
+    if (promedios.length) {
+        const avg  = promedios.reduce((a,b) => a+b, 0) / promedios.length;
+        const dist = { 4: 0, 3: 0, 2: 0, 1: 0 };
+        promedios.forEach(p => {
+            if (p >= 3.5) dist[4]++; else if (p >= 2.5) dist[3]++;
+            else if (p >= 1.5) dist[2]++; else dist[1]++;
+        });
+
+        const y = doc.lastAutoTable.finalY + 8;
+        doc.setFontSize(9);
+        doc.setFont('helvetica','bold');
+        doc.setTextColor(39,103,73);
+        doc.text('Resumen estadístico', 14, y);
+
+        doc.autoTable({
+            startY: y + 3,
+            head: [['Total evaluaciones','Promedio general','Muy Bueno (≥3.5)','Bueno (2.5–3.49)','Suficiente (1.5–2.49)','No suficiente (<1.5)']],
+            body: [[
+                totalEv,
+                avg.toFixed(2),
+                `${dist[4]} (${((dist[4]/promedios.length)*100).toFixed(1)}%)`,
+                `${dist[3]} (${((dist[3]/promedios.length)*100).toFixed(1)}%)`,
+                `${dist[2]} (${((dist[2]/promedios.length)*100).toFixed(1)}%)`,
+                `${dist[1]} (${((dist[1]/promedios.length)*100).toFixed(1)}%)`,
+            ]],
+            styles: { fontSize: 8, halign: 'center' },
+            headStyles: { fillColor: [74,85,104], textColor: 255, fontStyle: 'bold' },
+        });
+    }
+
+    const slug = periodoLabel.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'');
+    doc.save(`evaluaciones-${usuarioCoord.id_carrera}-${slug}.pdf`);
 }
 
 // ------------------------------------------------------------

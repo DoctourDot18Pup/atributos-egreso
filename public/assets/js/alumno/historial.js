@@ -100,7 +100,7 @@ async function cargarHistorial(periodo = '') {
                 </button>
             </td>
         </tr>`;
-    }).join('') || '<tr><td colspan="5" style="text-align:center;color:#a0aec0">Sin evaluaciones registradas</td></tr>';
+    }).join('');
 
     if (tablaHist) { tablaHist.destroy(); tablaHist = null; }
     document.getElementById('tbody-hist').innerHTML = filas;

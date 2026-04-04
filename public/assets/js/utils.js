@@ -60,7 +60,10 @@ async function apiFetch(endpoint, options = {}) {
 
     const data = await response.json();
 
-    if (response.status === 401) {
+    // Redirigir al index solo si había sesión activa (token expirado/inválido).
+    // Si no hay token, el 401 viene de credenciales incorrectas en login.php —
+    // dejamos que el llamador maneje el error.
+    if (response.status === 401 && Auth.getToken()) {
         Auth.clear();
         window.location.href = '/atributos-egreso/public/index.html';
         return;

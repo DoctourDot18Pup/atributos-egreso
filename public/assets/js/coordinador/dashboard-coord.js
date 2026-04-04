@@ -32,10 +32,11 @@ function dtOpciones(extra = {}) {
 
 // ------------------------------------------------------------
 const vistaTitulos = {
-    'inicio':             ['Inicio',        `Resumen de la carrera ${usuarioCoord?.id_carrera || ''}`],
-    'evaluaciones':       ['Evaluaciones',  'Historial de evaluaciones registradas'],
-    'materias-coord':     ['Materias',      'Materias y sus AE asignados'],
-    'estudiantes-coord':  ['Estudiantes',   'Alumnos de la carrera'],
+    'inicio':             ['Inicio',          `Resumen de la carrera ${usuarioCoord?.id_carrera || ''}`],
+    'inscripciones':      ['Inscripciones',   'Gestión de materias inscritas por alumno y período'],
+    'evaluaciones':       ['Evaluaciones',    'Historial de evaluaciones registradas'],
+    'materias-coord':     ['Materias',        'Materias y sus AE asignados'],
+    'estudiantes-coord':  ['Estudiantes',     'Alumnos de la carrera'],
 };
 
 let vistaActualCoord = null;
@@ -56,10 +57,11 @@ function cargarVistaCoord(vista) {
         '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
 
     const modulos = {
-        'inicio':            () => typeof initInicio           === 'function' && initInicio(),
-        'evaluaciones':      () => typeof initEvaluaciones     === 'function' && initEvaluaciones(),
-        'materias-coord':    () => typeof initMateriasCoord    === 'function' && initMateriasCoord(),
-        'estudiantes-coord': () => typeof initEstudiantesCoord === 'function' && initEstudiantesCoord(),
+        'inicio':            () => typeof initInicio            === 'function' && initInicio(),
+        'inscripciones':     () => typeof initInscripciones     === 'function' && initInscripciones(),
+        'evaluaciones':      () => typeof initEvaluaciones      === 'function' && initEvaluaciones(),
+        'materias-coord':    () => typeof initMateriasCoord     === 'function' && initMateriasCoord(),
+        'estudiantes-coord': () => typeof initEstudiantesCoord  === 'function' && initEstudiantesCoord(),
     };
 
     modulos[vista]?.();

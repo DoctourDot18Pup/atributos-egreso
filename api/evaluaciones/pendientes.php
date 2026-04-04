@@ -39,7 +39,6 @@ $id_periodo    = $periodo['id_periodo'];
 $id_estudiante = (int)$usuario->id_estudiante;
 
 // 2. Materias en las que el alumno está inscrito en este período
-//    que además tienen al menos 1 criterio activo
 $stmtMat = $pdo->prepare("
     SELECT i.id_materia, m.nombre AS materia_nombre
     FROM inscripciones i
@@ -47,13 +46,6 @@ $stmtMat = $pdo->prepare("
     WHERE i.id_estudiante = :est
       AND i.id_periodo    = :per
       AND m.activo = 1
-      AND EXISTS (
-          SELECT 1
-          FROM materias_ae mae
-          JOIN atributos_egreso ae ON ae.id_ae = mae.id_ae
-          JOIN criterios cr ON cr.id_ae = ae.id_ae AND cr.activo = 1
-          WHERE mae.id_materia = i.id_materia
-      )
     ORDER BY m.nombre ASC
 ");
 $stmtMat->execute([':est' => $id_estudiante, ':per' => $id_periodo]);

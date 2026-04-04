@@ -23,13 +23,14 @@ function generarToken(array $usuario): string {
     $ahora = time();
 
     $payload = [
-        'iat'         => $ahora,
-        'exp'         => $ahora + JWT_TTL,
-        'id_usuario'  => $usuario['id_usuario'],
-        'email'       => $usuario['email'],
-        'rol'         => $usuario['rol'],
-        'id_carrera'  => $usuario['id_carrera'] ?? null,
+        'iat'           => $ahora,
+        'exp'           => $ahora + JWT_TTL,
+        'id_usuario'    => $usuario['id_usuario'],
+        'email'         => $usuario['email'],
+        'rol'           => $usuario['rol'],
+        'id_carrera'    => $usuario['id_carrera'] ?? null,
         'id_estudiante' => $usuario['id_estudiante'] ?? null,
+        'primera_vez'   => (int)($usuario['primera_vez'] ?? 0),
     ];
 
     return JWT::encode($payload, JWT_SECRET, JWT_ALGO);

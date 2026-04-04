@@ -45,7 +45,7 @@ if (!str_contains($identificador, '@')) {
     // Es matrícula — buscar el email del usuario vinculado al estudiante
     $stmt = $pdo->prepare("
         SELECT u.id_usuario, u.email, u.password_hash, u.rol,
-               u.id_estudiante, u.id_carrera, u.activo
+               u.id_estudiante, u.id_carrera, u.activo, u.primera_vez
         FROM usuarios u
         JOIN estudiantes e ON e.id_estudiante = u.id_estudiante
         WHERE e.matricula = :matricula
@@ -56,7 +56,7 @@ if (!str_contains($identificador, '@')) {
     // Es email
     $stmt = $pdo->prepare("
         SELECT id_usuario, email, password_hash, rol,
-               id_estudiante, id_carrera, activo
+               id_estudiante, id_carrera, activo, primera_vez
         FROM usuarios
         WHERE email = :email
         LIMIT 1
@@ -131,6 +131,7 @@ echo json_encode([
         'rol'           => $usuario['rol'],
         'id_estudiante' => $usuario['id_estudiante'],
         'id_carrera'    => $usuario['id_carrera'],
+        'primera_vez'   => (int)$usuario['primera_vez'],
         ...$extra,
     ],
 ]);

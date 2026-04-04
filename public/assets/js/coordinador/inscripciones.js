@@ -115,10 +115,18 @@ function initInscripciones() {
             </div>
             <div class="card-body">
                 <div id="ins-content">
-                    <div style="text-align:center;padding:40px;color:#a0aec0;font-size:0.88rem">
-                        <i class="fa-solid fa-arrow-up" style="display:block;font-size:1.5rem;margin-bottom:8px"></i>
-                        Selecciona un período para ver las inscripciones
-                    </div>
+                    <table id="tabla-ins" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Matrícula</th>
+                                <th>Estudiante</th>
+                                <th style="width:80px">Semestre</th>
+                                <th>Materias inscritas</th>
+                                <th style="width:100px">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-ins"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -139,6 +147,9 @@ async function cargarPeriodosIns() {
         apiFetch(`/estudiantes/index.php?carrera=${usuarioCoord.id_carrera}`),
     ]);
 
+    if (resMat?.ok) materiasInsCache = resMat.data.data;
+    if (resEst?.ok) estudiantesInsCache = resEst.data.data.filter(e => e.activo == 1);
+
     if (resPer?.ok) {
         periodoInsCache = resPer.data.data;
         const sel = document.getElementById('filtro-periodo-ins');
@@ -152,9 +163,6 @@ async function cargarPeriodosIns() {
             cargarTablaInscripciones();
         }
     }
-
-    if (resMat?.ok) materiasInsCache = resMat.data.data;
-    if (resEst?.ok) estudiantesInsCache = resEst.data.data.filter(e => e.activo == 1);
 }
 
 // ------------------------------------------------------------
@@ -164,8 +172,9 @@ async function cargarTablaInscripciones() {
     const idPeriodo = document.getElementById('filtro-periodo-ins')?.value;
     if (!idPeriodo) return;
 
-    document.getElementById('ins-content').innerHTML =
-        '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
+    if (tablaIns) { tablaIns.destroy(); tablaIns = null; }
+    document.getElementById('tbody-ins').innerHTML =
+        '<tr><td colspan="5" style="text-align:center"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</td></tr>';
 
     const result = await apiFetch(
         `/inscripciones/index.php?periodo=${idPeriodo}&carrera=${usuarioCoord.id_carrera}`
@@ -227,21 +236,7 @@ async function cargarTablaInscripciones() {
         </tr>`;
     }).join('');
 
-    document.getElementById('ins-content').innerHTML = `
-        <table id="tabla-ins" class="display" style="width:100%">
-            <thead>
-                <tr>
-                    <th>Matrícula</th>
-                    <th>Estudiante</th>
-                    <th style="width:80px">Semestre</th>
-                    <th>Materias inscritas</th>
-                    <th style="width:100px">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>${filas}</tbody>
-        </table>`;
-
-    if (tablaIns) { tablaIns.destroy(); tablaIns = null; }
+    document.getElementById('tbody-ins').innerHTML = filas;
     tablaIns = $('#tabla-ins').DataTable(dtOpciones({
         pageLength: 20,
         columnDefs: [{ orderable: false, targets: [3, 4] }],

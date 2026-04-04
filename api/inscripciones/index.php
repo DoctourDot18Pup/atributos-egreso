@@ -25,12 +25,12 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'GET':
-        $id_periodo   = (int)($_GET['periodo']    ?? 0);
+        $id_periodo    = (int)($_GET['periodo']    ?? 0);
         $id_estudiante = (int)($_GET['estudiante'] ?? 0);
 
-        // Coordinador solo ve su carrera
-        $carrera = $usuario->rol === 'coordinador'
-            ? $usuario->id_carrera
+        // Coordinador siempre usa su propia carrera del JWT
+        $carrera = ($usuario->rol === 'coordinador')
+            ? (string)($usuario->id_carrera ?? '')
             : trim($_GET['carrera'] ?? '');
 
         if (!$id_periodo) {
@@ -39,26 +39,38 @@ switch ($method) {
             exit;
         }
 
+        // LEFT JOIN desde estudiantes: siempre devuelve todos los alumnos
+        // con o sin inscripciones en el período solicitado.
         $sql = "
-            SELECT i.id_inscripcion, i.id_estudiante, i.id_materia, i.id_periodo,
-                   e.matricula, e.nombre AS est_nombre,
-                   e.apellido_paterno, e.apellido_materno, e.semestre,
+            SELECT e.id_estudiante, e.matricula,
+                   e.nombre AS est_nombre, e.apellido_paterno, e.apellido_materno, e.semestre,
+                   i.id_inscripcion, i.id_materia,
                    m.nombre AS materia_nombre
-            FROM inscripciones i
-            JOIN estudiantes e ON e.id_estudiante = i.id_estudiante
-            JOIN materias    m ON m.id_materia    = i.id_materia
-            WHERE i.id_periodo = :periodo
+            FROM estudiantes e
+            LEFT JOIN inscripciones i
+                ON  i.id_estudiante = e.id_estudiante
+                AND i.id_periodo    = :periodo
+            LEFT JOIN materias m ON m.id_materia = i.id_materia
+            WHERE e.activo = 1
         ";
         $params = [':periodo' => $id_periodo];
 
+        // Filtrar por carrera (requerido cuando se consulta lista completa)
         if ($carrera !== '') {
             $sql .= " AND e.id_carrera = :carrera";
             $params[':carrera'] = $carrera;
         }
 
+        // O filtrar por estudiante específico (modal de gestión)
         if ($id_estudiante > 0) {
-            $sql .= " AND i.id_estudiante = :est";
+            $sql .= " AND e.id_estudiante = :est";
             $params[':est'] = $id_estudiante;
+        }
+
+        if ($carrera === '' && $id_estudiante === 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Se requiere carrera o estudiante.']);
+            exit;
         }
 
         $sql .= " ORDER BY e.apellido_paterno, e.apellido_materno, e.nombre, m.nombre";

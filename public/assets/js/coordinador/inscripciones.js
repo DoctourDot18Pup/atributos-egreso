@@ -181,35 +181,26 @@ async function cargarTablaInscripciones() {
     );
     if (!result?.ok) return;
 
-    // Agrupar inscripciones por estudiante
+    // El API ya devuelve TODOS los alumnos de la carrera (LEFT JOIN).
+    // Una fila por alumno-materia; id_materia es null cuando no tiene inscripciones.
     const porEst = {};
-    result.data.data.forEach(ins => {
-        if (!porEst[ins.id_estudiante]) {
-            porEst[ins.id_estudiante] = {
-                id_estudiante:   ins.id_estudiante,
-                matricula:        ins.matricula,
-                nombre:           [ins.apellido_paterno, ins.apellido_materno, ins.est_nombre].filter(Boolean).join(' '),
-                semestre:         ins.semestre,
-                materias:         [],
-            };
-        }
-        porEst[ins.id_estudiante].materias.push({
-            id_inscripcion: ins.id_inscripcion,
-            id_materia:     ins.id_materia,
-            nombre:         ins.materia_nombre,
-        });
-    });
-
-    // Agregar alumnos sin ninguna inscripción en este período
-    estudiantesInsCache.forEach(e => {
-        if (!porEst[e.id_estudiante]) {
-            porEst[e.id_estudiante] = {
-                id_estudiante: e.id_estudiante,
-                matricula:     e.matricula,
-                nombre:        [e.apellido_paterno, e.apellido_materno, e.nombre].filter(Boolean).join(' '),
-                semestre:      e.semestre,
+    result.data.data.forEach(fila => {
+        if (!porEst[fila.id_estudiante]) {
+            porEst[fila.id_estudiante] = {
+                id_estudiante: fila.id_estudiante,
+                matricula:     fila.matricula,
+                nombre:        [fila.apellido_paterno, fila.apellido_materno, fila.est_nombre].filter(Boolean).join(' '),
+                semestre:      fila.semestre,
                 materias:      [],
             };
+        }
+        // Solo agregar materia si existe (no es null)
+        if (fila.id_materia) {
+            porEst[fila.id_estudiante].materias.push({
+                id_inscripcion: fila.id_inscripcion,
+                id_materia:     fila.id_materia,
+                nombre:         fila.materia_nombre,
+            });
         }
     });
 
@@ -276,7 +267,8 @@ async function renderGestionarIns() {
         return;
     }
 
-    const inscritas = result.data.data;
+    // Filtrar solo las filas con materia (LEFT JOIN puede traer fila sin materia)
+    const inscritas = result.data.data.filter(f => f.id_materia);
     const inscritasIds = new Set(inscritas.map(i => i.id_materia));
 
     // Materias disponibles para agregar (de la carrera, no inscritas aún)

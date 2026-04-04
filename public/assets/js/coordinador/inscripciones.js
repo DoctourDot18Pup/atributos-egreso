@@ -179,6 +179,8 @@ async function cargarTablaInscripciones() {
     const result = await apiFetch(
         `/inscripciones/index.php?periodo=${idPeriodo}&carrera=${usuarioCoord.id_carrera}`
     );
+    console.log('[inscripciones] periodo:', idPeriodo, '| carrera:', usuarioCoord.id_carrera);
+    console.log('[inscripciones] respuesta API:', result);
     if (!result?.ok) return;
 
     // El API ya devuelve TODOS los alumnos de la carrera (LEFT JOIN).
@@ -208,8 +210,13 @@ async function cargarTablaInscripciones() {
         const sem     = est.semestre ? `${est.semestre}°` : '—';
         const numMat  = est.materias.length;
         const badge   = numMat > 0
-            ? `<span style="padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;
-                            background:#f0fff4;color:#276749;border:1px solid #9ae6b4">${numMat}</span>`
+            ? est.materias.map(m => `
+                <span title="${m.nombre}"
+                      style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.72rem;
+                             font-weight:600;background:#f0fff4;color:#276749;border:1px solid #9ae6b4;
+                             margin:2px 3px 2px 0;white-space:nowrap;cursor:default">
+                    ${m.id_materia}
+                </span>`).join('')
             : `<span style="padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;
                             background:#fff5f5;color:#c53030;border:1px solid #feb2b2">Sin inscripciones</span>`;
 
@@ -372,11 +379,16 @@ function abrirModalImportCSV() {
         sel.appendChild(opt);
     });
 
+    // Preseleccionar período activo explícitamente DESPUÉS de añadir opciones
+    const periodoActivo = periodoInsCache.find(p => p.activo == 1);
+    if (periodoActivo) sel.value = periodoActivo.id_periodo;
+
     // Limpiar estado previo
     document.getElementById('csv-file').value       = '';
     document.getElementById('csv-preview').style.display  = 'none';
     document.getElementById('csv-resultado').style.display = 'none';
     document.getElementById('msg-csv').className    = 'form-msg';
+    document.getElementById('msg-csv').textContent  = '';
     document.getElementById('btn-ejecutar-import').disabled = true;
     _csvFilas = [];
 
@@ -459,7 +471,7 @@ async function ejecutarImportCSV() {
         return;
     }
 
-    const { insertados, duplicados, errores, total } = result.data;
+    const { insertados, duplicados, errores } = result.data;
 
     let html = `
         <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:14px 16px;margin-bottom:12px">

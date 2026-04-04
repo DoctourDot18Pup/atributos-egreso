@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/session.php';
 
-requireRol('admin');
+$usuario = requireRol('admin', 'coordinador');
 
 $pdo    = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -27,7 +27,12 @@ switch ($method) {
     // --------------------------------------------------------
     case 'GET':
         $id_materia = trim($_GET['materia'] ?? '');
-        $carrera    = trim($_GET['carrera'] ?? '');
+        // Coordinador solo puede ver AE de su carrera
+        if ($usuario->rol === 'coordinador') {
+            $carrera = $usuario->id_carrera;
+        } else {
+            $carrera = trim($_GET['carrera'] ?? '');
+        }
 
         $sql = "
             SELECT mae.id_materia_ae, mae.id_materia, mae.id_ae, mae.nivel_ae,
@@ -61,6 +66,7 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'POST':
+        if ($usuario->rol !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Acceso denegado.']); exit; }
         $body       = json_decode(file_get_contents('php://input'), true);
         $id_materia = trim($body['id_materia'] ?? '');
         $id_ae      = (int)($body['id_ae']     ?? 0);
@@ -92,6 +98,7 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'PUT':
+        if ($usuario->rol !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Acceso denegado.']); exit; }
         $id       = (int)($_GET['id'] ?? 0);
         $body     = json_decode(file_get_contents('php://input'), true);
         $nivel_ae = strtoupper(trim($body['nivel_ae'] ?? ''));
@@ -116,6 +123,7 @@ switch ($method) {
 
     // --------------------------------------------------------
     case 'DELETE':
+        if ($usuario->rol !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Acceso denegado.']); exit; }
         $id = (int)($_GET['id'] ?? 0);
 
         if (!$id) {

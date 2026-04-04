@@ -10,6 +10,9 @@ api/config/local.php
 .DS_Store
 Thumbs.db
 
+# Symlink circular generado por XAMPP en Windows
+atributos-egreso
+
 # Editores
 .vscode/settings.json
 .idea/
